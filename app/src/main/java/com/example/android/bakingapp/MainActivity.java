@@ -7,14 +7,17 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.example.android.bakingapp.Retrofit.Model.API_Trailer;
+import com.example.android.bakingapp.Retrofit.Model.Ingredient;
 import com.example.android.bakingapp.Retrofit.Model.Recipe;
 import com.example.android.bakingapp.Retrofit.Model.Recipe_Interface;
+import com.example.android.bakingapp.Retrofit.Model.Step;
 import com.google.gson.JsonArray;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,11 +29,14 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
     private Recipe_Interface recipe_interface;
     private static final String TAG = "Main Activity";
     public ArrayList<Recipe> recipes = new ArrayList<>();
+    public ArrayList<Ingredient> ingredients = new ArrayList<>();
+    public ArrayList<Step> steps = new ArrayList<>();
     public Recipe recipe;
+    public Ingredient ingredient;
+    public Step step;
 
     private RecyclerView recipesNameRV;
     public RecipeAdapter adapter;
-    public ArrayList<String> recipeNames = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,11 +64,9 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
 
                 final String recipesString = response.body().toString();
 
-                retriveRecipesName(recipesString);
+                retriveRecipes(recipesString);
 
-                adapter.setRecipesNames(recipeNames);
-
-
+                adapter.setRecipes(recipes);
             }
 
             @Override
@@ -74,22 +78,70 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
 
     @Override
     public void onClick(int position) {
-        String a = recipeNames.get(position);
+
     }
 
-    private ArrayList<String> retriveRecipesName(String responseJson) {
+    private List<Recipe> retriveRecipes(String responseJson) {
         try {
             JSONArray jsonArray = new JSONArray(responseJson);
             for (int i = 0; i <= jsonArray.length(); i++) {
-                JSONObject recipe = jsonArray.getJSONObject(i);
-                String name = recipe.opt("name").toString();
-                recipeNames.add(name);
+                JSONObject recipeJson = jsonArray.getJSONObject(i);
+                int id = recipeJson.optInt("id");
+                String name = recipeJson.opt("name").toString();
+
+                ingredients = retriveIngredients(recipeJson);
+                steps = retriveSteps(recipeJson);
+
+                int servingsNumber = recipeJson.getInt("servings");
+                String recipeImage = recipeJson.opt("image").toString();
+
+                recipe = new Recipe(id, name, ingredients, steps, servingsNumber, recipeImage);
+                recipes.add(recipe);
             }
 
         } catch (org.json.JSONException e) {
             Log.e(TAG, "eroare");
         }
 
-        return recipeNames;
+        return recipes;
     }
+
+    private ArrayList<Ingredient> retriveIngredients(JSONObject recipe) {
+        try {
+            JSONArray ingredientsList = recipe.getJSONArray("ingredients");
+            int a = ingredientsList.length();
+            for (int j = 0; j <= ingredientsList.length(); j++) {
+                JSONObject ingredientJson = ingredientsList.getJSONObject(j);
+                Double ingredientQuantity = ingredientJson.optDouble("quantity");
+                String ingredientMeasure = ingredientJson.optString("measure");
+                String ingredientName = ingredientJson.optString("ingredient");
+                ingredient = new Ingredient(ingredientQuantity, ingredientMeasure, ingredientName);
+                ingredients.add(ingredient);
+            }
+        } catch (org.json.JSONException e) {
+            Log.e(TAG, "eroare");
+        }
+        return ingredients;
+    }
+
+    private ArrayList<Step> retriveSteps(JSONObject recipe) {
+        try {
+            JSONArray stepsList = recipe.getJSONArray("steps");
+            for (int k = 0; k <= stepsList.length(); k++) {
+                JSONObject stepJson = stepsList.getJSONObject(k);
+                int stepId = stepJson.optInt("id");
+                String stepShortDescription = stepJson.optString("shortDescription");
+                String stepDescription = stepJson.optString("description");
+                String stepVideo = stepJson.optString("videoURL");
+                String stepImage = stepJson.optString("thumbnailURL");
+                step = new Step(stepId, stepShortDescription, stepDescription, stepVideo, stepImage);
+                steps.add(step);
+            }
+
+        } catch (org.json.JSONException e) {
+            Log.e(TAG, "eroare");
+        }
+        return steps;
+    }
+
 }

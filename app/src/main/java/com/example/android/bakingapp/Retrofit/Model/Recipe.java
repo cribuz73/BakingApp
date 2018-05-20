@@ -3,27 +3,43 @@ package com.example.android.bakingapp.Retrofit.Model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class Recipe {
 
     @SerializedName("id")
     @Expose
-    private int id;
+    private Integer id;
     @SerializedName("name")
     @Expose
     private String name;
     @SerializedName("ingredients")
-
     @Expose
-    private int servings;
+    private List<Ingredient> ingredients = null;
+    @SerializedName("steps")
+    @Expose
+    private List<Step> steps = null;
+    @SerializedName("servings")
+    @Expose
+    private Integer servings;
     @SerializedName("image")
     @Expose
     private String image;
 
-    public int getId() {
+    public Recipe(Integer id, String name, List<Ingredient> ingredients, List<Step> steps, Integer servings, String image) {
+        this.id = id;
+        this.name = name;
+        this.ingredients = ingredients;
+        this.steps = steps;
+        this.servings = servings;
+        this.image = image;
+    }
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -35,11 +51,27 @@ public class Recipe {
         this.name = name;
     }
 
-    public int getServings() {
+    public List<Ingredient> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<Ingredient> ingredients) {
+        this.ingredients = ingredients;
+    }
+
+    public List<Step> getSteps() {
+        return steps;
+    }
+
+    public void setSteps(List<Step> steps) {
+        this.steps = steps;
+    }
+
+    public Integer getServings() {
         return servings;
     }
 
-    public void setServings(int servings) {
+    public void setServings(Integer servings) {
         this.servings = servings;
     }
 
