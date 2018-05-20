@@ -1,25 +1,20 @@
 package com.example.android.bakingapp;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.example.android.bakingapp.Retrofit.Model.API_Trailer;
 import com.example.android.bakingapp.Retrofit.Model.Recipe;
 import com.example.android.bakingapp.Retrofit.Model.Recipe_Interface;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,10 +24,13 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
 
 
     private Recipe_Interface recipe_interface;
-    public List<Recipe> recipes = new ArrayList<>();
+    private static final String TAG = "Main Activity";
+    public ArrayList<Recipe> recipes = new ArrayList<>();
+    public Recipe recipe;
+
     private RecyclerView recipesNameRV;
     public RecipeAdapter adapter;
-    public static List<String> recipesName;
+    public ArrayList<String> recipeNames = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,24 +39,12 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
 
         recipesNameRV = findViewById(R.id.recipe_name_RV);
         recipesNameRV.setLayoutManager(new LinearLayoutManager(this));
-        getRecipesData();
 
-
-        adapter = new RecipeAdapter(recipes,this);
+        adapter = new RecipeAdapter(this);
         recipesNameRV.setAdapter(adapter);
 
-    }
+        getRecipesData();
 
-    public Activity getActivity(){
-
-        Context context = this;
-        while (context instanceof ContextWrapper){
-            if(context instanceof Activity){
-                return (Activity) context;
-            }
-            context = ((ContextWrapper) context).getBaseContext();
-        }
-        return  null;
     }
 
 
@@ -70,25 +56,13 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
             @Override
             public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
 
-                String recipesString = response.body().toString();
-                java.lang.reflect.Type listType = new TypeToken<List<Recipe>>() {
-                }.getType();
-                recipes = getRecipesFromJSON(recipesString, listType);
+                final String recipesString = response.body().toString();
 
-                //      Type listType = new TypeToken<List<Recipe>>() {}.getType();
-                //      List<Recipe> recipesList = new Gson().fromJson(jsonBody, listType);
-                //       List<Recipe> obtainedRecipes = response.body();
+                retriveRecipesName(recipesString);
 
-                //      int a = obtainedRecipes.size();
-
-                //    for (int i = 0; i<= a; i++){
-                //        Recipe recipe = obtainedRecipes.get(i);
-                //       String recipeName = recipe.getName();
-                //       recipesName.add(recipeName);
-                //   }
+                adapter.setRecipesNames(recipeNames);
 
 
-                //       revRecyclerView.setAdapter(new ReviewAdapter(DetailActivity.this, obtainReviews.getReviews()));
             }
 
             @Override
@@ -97,24 +71,25 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
         });
     }
 
-    public static <T> List<T> getRecipesFromJSON(String jsonString, Type type) {
-        if (!isValidJson(jsonString)) {
-            return null;
-        }
-        return new Gson().fromJson(jsonString, type);
-    }
-
-    public static boolean isValidJson(String json) {
-        try {
-            new JsonParser().parse(json);
-            return true;
-        } catch (JsonSyntaxException e) {
-            return false;
-        }
-    }
 
     @Override
     public void onClick(int position) {
+        String a = recipeNames.get(position);
+    }
 
+    private ArrayList<String> retriveRecipesName(String responseJson) {
+        try {
+            JSONArray jsonArray = new JSONArray(responseJson);
+            for (int i = 0; i <= jsonArray.length(); i++) {
+                JSONObject recipe = jsonArray.getJSONObject(i);
+                String name = recipe.opt("name").toString();
+                recipeNames.add(name);
+            }
+
+        } catch (org.json.JSONException e) {
+            Log.e(TAG, "eroare");
+        }
+
+        return recipeNames;
     }
 }

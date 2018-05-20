@@ -7,22 +7,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.android.bakingapp.Retrofit.Model.Recipe;
-
-import java.util.List;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder> {
 
-    private List<Recipe> mrecipesList;
-    public RecipeAdapterOnClickHandler mClickHandler;
-  //  public Context mContext;
+    private static RecipeAdapterOnClickHandler mClickHandler;
+    private ArrayList<String> mrecipesName;
 
-    public RecipeAdapter(List<Recipe> recipesList,RecipeAdapterOnClickHandler clickHandler) {
-        mrecipesList = recipesList;
+    public RecipeAdapter(RecipeAdapterOnClickHandler clickHandler) {
         mClickHandler = clickHandler;
-    //    mContext = context;
     }
 
     @Override
@@ -35,24 +30,37 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
     @Override
     public void onBindViewHolder(RecipeAdapter.ViewHolder holder, int position) {
 
-            Recipe recipe = mrecipesList.get(position);
-            holder.recipe_name_tv.setText(recipe.getName());
+        String name = mrecipesName.get(position);
+        holder.recipe_name_tv.setText(name);
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return (mrecipesName == null) ? 0 : mrecipesName.size();
+
     }
 
+    public void setRecipesNames(ArrayList<String> recipesNames) {
+        mrecipesName = recipesNames;
+        notifyDataSetChanged();
+    }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.recipe_name)
         TextView recipe_name_tv;
 
 
-        public ViewHolder(View itemView) {
+        private ViewHolder(View itemView) {
             super(itemView);
             recipe_name_tv = itemView.findViewById(R.id.recipe_name);
+            itemView.setOnClickListener(this);
+
+        }
+
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            mClickHandler.onClick(adapterPosition);
         }
     }
 
