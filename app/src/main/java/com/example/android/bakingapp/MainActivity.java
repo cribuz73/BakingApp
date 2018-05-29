@@ -1,5 +1,6 @@
 package com.example.android.bakingapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -78,7 +79,10 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
 
     @Override
     public void onClick(int position) {
-
+        Recipe clickedRecipe = recipes.get(position);
+        Intent intent = new Intent(getApplicationContext(), RecipeActivity.class);
+        intent.putExtra("recipe", clickedRecipe);
+        startActivity(intent);
     }
 
     private List<Recipe> retriveRecipes(String responseJson) {
@@ -89,7 +93,23 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
                 int id = recipeJson.optInt("id");
                 String name = recipeJson.opt("name").toString();
 
-                ingredients = retriveIngredients(recipeJson);
+                //       ingredients = retriveIngredients(recipeJson);
+
+                JSONArray ingredientsList = recipeJson.getJSONArray("ingredients");
+                int a = ingredientsList.length();
+                for (int j = 0; j <= ingredientsList.length(); j++) {
+                    try {
+                        JSONObject ingredientJson = ingredientsList.getJSONObject(j);
+                        Double ingredientQuantity = ingredientJson.optDouble("quantity");
+                        String ingredientMeasure = ingredientJson.optString("measure");
+                        String ingredientName = ingredientJson.optString("ingredient");
+                        ingredient = new Ingredient(ingredientQuantity, ingredientMeasure, ingredientName);
+                        ingredients.add(ingredient);
+
+                    } catch (org.json.JSONException e) {
+                        Log.e(TAG, "eroare");
+                    }
+                }
                 steps = retriveSteps(recipeJson);
 
                 int servingsNumber = recipeJson.getInt("servings");
@@ -106,23 +126,23 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
         return recipes;
     }
 
-    private ArrayList<Ingredient> retriveIngredients(JSONObject recipe) {
-        try {
-            JSONArray ingredientsList = recipe.getJSONArray("ingredients");
-            int a = ingredientsList.length();
-            for (int j = 0; j <= ingredientsList.length(); j++) {
-                JSONObject ingredientJson = ingredientsList.getJSONObject(j);
-                Double ingredientQuantity = ingredientJson.optDouble("quantity");
-                String ingredientMeasure = ingredientJson.optString("measure");
-                String ingredientName = ingredientJson.optString("ingredient");
-                ingredient = new Ingredient(ingredientQuantity, ingredientMeasure, ingredientName);
-                ingredients.add(ingredient);
-            }
-        } catch (org.json.JSONException e) {
-            Log.e(TAG, "eroare");
-        }
-        return ingredients;
-    }
+    //   private ArrayList<Ingredient> retriveIngredients(JSONObject recipe) {
+//        try {
+    //           JSONArray ingredientsList = recipe.getJSONArray("ingredients");
+    //           int a = ingredientsList.length();
+    //          for (int j = 0; j <= ingredientsList.length(); j++) {
+    //             JSONObject ingredientJson = ingredientsList.getJSONObject(j);
+    //              Double ingredientQuantity = ingredientJson.optDouble("quantity");
+    //             String ingredientMeasure = ingredientJson.optString("measure");
+    //            String ingredientName = ingredientJson.optString("ingredient");
+    //             ingredient = new Ingredient(ingredientQuantity, ingredientMeasure, ingredientName);
+    //            ingredients.add(ingredient);
+    //        }
+    //    } catch (org.json.JSONException e) {
+    //        Log.e(TAG, "eroare");
+    //    }
+    //   return ingredients;
+    // }
 
     private ArrayList<Step> retriveSteps(JSONObject recipe) {
         try {
