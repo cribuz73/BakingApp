@@ -3,8 +3,9 @@ package com.example.android.bakingapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.example.android.bakingapp.Retrofit.Model.API_Trailer;
@@ -44,8 +45,9 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         recipesNameRV = findViewById(R.id.recipe_name_RV);
-        recipesNameRV.setLayoutManager(new LinearLayoutManager(this));
+        recipesNameRV.setLayoutManager(new GridLayoutManager(this, numberOfColumns()));
 
         adapter = new RecipeAdapter(this);
         recipesNameRV.setAdapter(adapter);
@@ -54,6 +56,16 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
 
     }
 
+    private int numberOfColumns() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        // You can change this divider to adjust the size of the poster
+        int widthDivider = 400;
+        int width = displayMetrics.widthPixels;
+        int nColumns = width / widthDivider;
+        if (nColumns < 1) return 1;
+        return nColumns;
+    }
 
     public void getRecipesData() {
 
@@ -93,23 +105,7 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
                 int id = recipeJson.optInt("id");
                 String name = recipeJson.opt("name").toString();
 
-                //       ingredients = retriveIngredients(recipeJson);
-
-                JSONArray ingredientsList = recipeJson.getJSONArray("ingredients");
-                int a = ingredientsList.length();
-                for (int j = 0; j <= ingredientsList.length(); j++) {
-                    try {
-                        JSONObject ingredientJson = ingredientsList.getJSONObject(j);
-                        Double ingredientQuantity = ingredientJson.optDouble("quantity");
-                        String ingredientMeasure = ingredientJson.optString("measure");
-                        String ingredientName = ingredientJson.optString("ingredient");
-                        ingredient = new Ingredient(ingredientQuantity, ingredientMeasure, ingredientName);
-                        ingredients.add(ingredient);
-
-                    } catch (org.json.JSONException e) {
-                        Log.e(TAG, "eroare");
-                    }
-                }
+                ingredients = retriveIngredients(recipeJson);
                 steps = retriveSteps(recipeJson);
 
                 int servingsNumber = recipeJson.getInt("servings");
@@ -126,25 +122,32 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
         return recipes;
     }
 
-    //   private ArrayList<Ingredient> retriveIngredients(JSONObject recipe) {
-//        try {
-    //           JSONArray ingredientsList = recipe.getJSONArray("ingredients");
-    //           int a = ingredientsList.length();
-    //          for (int j = 0; j <= ingredientsList.length(); j++) {
-    //             JSONObject ingredientJson = ingredientsList.getJSONObject(j);
-    //              Double ingredientQuantity = ingredientJson.optDouble("quantity");
-    //             String ingredientMeasure = ingredientJson.optString("measure");
-    //            String ingredientName = ingredientJson.optString("ingredient");
-    //             ingredient = new Ingredient(ingredientQuantity, ingredientMeasure, ingredientName);
-    //            ingredients.add(ingredient);
-    //        }
-    //    } catch (org.json.JSONException e) {
-    //        Log.e(TAG, "eroare");
-    //    }
-    //   return ingredients;
-    // }
+    private ArrayList<Ingredient> retriveIngredients(JSONObject recipe) {
+
+        ingredients = new ArrayList<>();
+
+        try {
+            JSONArray ingredientsList = recipe.getJSONArray("ingredients");
+            int a = ingredientsList.length();
+            for (int j = 0; j <= ingredientsList.length(); j++) {
+
+                JSONObject ingredientJson = ingredientsList.getJSONObject(j);
+                Double ingredientQuantity = ingredientJson.optDouble("quantity");
+                String ingredientMeasure = ingredientJson.optString("measure");
+                String ingredientName = ingredientJson.optString("ingredient");
+                ingredient = new Ingredient(ingredientQuantity, ingredientMeasure, ingredientName);
+                ingredients.add(ingredient);
+            }
+        } catch (org.json.JSONException e) {
+            Log.e(TAG, "eroare");
+        }
+
+        return ingredients;
+    }
 
     private ArrayList<Step> retriveSteps(JSONObject recipe) {
+        steps = new ArrayList<>();
+
         try {
             JSONArray stepsList = recipe.getJSONArray("steps");
             for (int k = 0; k <= stepsList.length(); k++) {
