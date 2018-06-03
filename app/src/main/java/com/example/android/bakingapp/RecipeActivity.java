@@ -5,8 +5,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,22 +18,28 @@ import com.example.android.bakingapp.Retrofit.Model.Ingredient;
 import com.example.android.bakingapp.Retrofit.Model.Recipe;
 import com.example.android.bakingapp.Retrofit.Model.Step;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class RecipeActivity extends AppCompatActivity implements StepAdapter.StepAdapterOnClickHandler {
+public class RecipeActivity extends AppCompatActivity {
 
     @BindView(R.id.recipe_ingredients_details)
     TextView recipe_ingredients_tv;
-    @BindView(R.id.recipe_steps_recycler)
-    RecyclerView recipe_steps_rv;
+    public int stepPosition;
     private Recipe dRecipe;
     private Fragment mFragment;
     private MasterFragment masterFragment;
     private StepsFragment stepsFragment;
     private StepAdapter stepAdapter;
+    public ArrayList<Step> stepsArray;
+    @BindView(R.id.recipe_steps_list)
+    ListView recipe_steps_lv;
+    private Step clickedStep;
+
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,11 +67,23 @@ public class RecipeActivity extends AppCompatActivity implements StepAdapter.Ste
         }
         recipe_ingredients_tv.setText(recipeIngredients.toString());
 
-        List<Step> recipeSteps = dRecipe.getSteps();
-        recipe_steps_rv.setLayoutManager(new LinearLayoutManager(this));
-        stepAdapter = new StepAdapter(this);
-        stepAdapter.setSteps(recipeSteps);
-        recipe_steps_rv.setAdapter(stepAdapter);
+        final List<Step> recipeSteps = dRecipe.getSteps();
+
+        stepAdapter = new StepAdapter(this, 0, recipeSteps);
+        recipe_steps_lv.setAdapter(stepAdapter);
+        recipe_steps_lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                stepPosition = Integer.valueOf(position);
+                stepsArray = returnArrayList(recipeSteps);
+                Intent intent = new Intent(getApplicationContext(), StepActivity.class);
+                intent.putParcelableArrayListExtra("steps", stepsArray);
+                intent.putExtra("position", stepPosition);
+                startActivity(intent);
+            }
+        });
+
+
 
 
         //      masterFragment = new MasterFragment();
@@ -86,18 +105,19 @@ public class RecipeActivity extends AppCompatActivity implements StepAdapter.Ste
 
     }
 
+    public ArrayList<Step> returnArrayList(List<Step> steps) {
+        stepsArray = new ArrayList<>();
+        for (int i = 0; i < steps.size(); i++) {
+            Step step = steps.get(i);
+            stepsArray.add(step);
+        }
+        return stepsArray;
+    }
+
     private void closeOnError() {
         finish();
         Toast.makeText(this, "Error !!!!!", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void onPointerCaptureChanged(boolean hasCapture) {
 
-    }
-
-    @Override
-    public void onClick(int position) {
-
-    }
 }
