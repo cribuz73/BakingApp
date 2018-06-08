@@ -113,7 +113,6 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
         next_step_bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //          releasePlayer();
 
                 currentPosition++;
                 if (currentPosition == mSteps.size()) {
@@ -176,18 +175,14 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
     }
 
     private void initializeMediaSession(Context context) {
-        // Create a MediaSessionCompat.
         mMediaSession = new MediaSessionCompat(context, "BakingApp");
 
-        // Enable callbacks from MediaButtons and TransportControls.
         mMediaSession.setFlags(
                 MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
                         MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
-        // Do not let MediaButtons restart the player when the app is not visible.
         mMediaSession.setMediaButtonReceiver(null);
 
-        // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player.
         mStateBuilder = new PlaybackStateCompat.Builder()
                 .setActions(
                         PlaybackStateCompat.ACTION_PLAY |
@@ -196,11 +191,7 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
                                 PlaybackStateCompat.ACTION_PLAY_PAUSE);
 
         mMediaSession.setPlaybackState(mStateBuilder.build());
-
-        // MySessionCallback has methods that handle callbacks from a media controller.
         mMediaSession.setCallback(new MySessionCallback());
-
-        // Start the Media Session since the activity is active.
         mMediaSession.setActive(true);
     }
 
@@ -243,7 +234,6 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
         outState.putInt(STEP_POSITION, currentPosition);
         outState.putBoolean(HIDE_NAVIGATION, mHideNavigation);
         if (!TextUtils.isEmpty(mSteps.get(currentPosition).getVideoURL())) {
-            //      currentMediaPlayerPosition = mExoPlayer.getCurrentPosition();
             outState.putLong(CURRENT_PLAYER_POSITION, currentMediaPlayerPosition);
             outState.putBoolean(CURRENT_PLAYER_STATE, currentMediaPlayerState);
         }

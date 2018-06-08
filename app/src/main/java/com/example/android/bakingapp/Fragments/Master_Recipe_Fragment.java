@@ -3,7 +3,6 @@ package com.example.android.bakingapp.Fragments;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,7 +16,6 @@ import com.example.android.bakingapp.Retrofit.Model.Ingredient;
 import com.example.android.bakingapp.Retrofit.Model.Step;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,11 +24,14 @@ public class Master_Recipe_Fragment extends Fragment implements Master_Recipe_Ad
 
     @BindView(R.id.recipe_ingredients_details)
     TextView ingredients_tv;
-    @BindView(R.id.recipe_steps_list)
-    RecyclerView stepList_rv;
+    private static final String FRAGMENT_STEP_ARRAY = "fragment_step_array";
     private ArrayList<Step> mSteps;
-    private List<Ingredient> mIngredients;
+    private static final String FRAGMENT_INGREDIENT_ARRAY = "fragment_ingredient_array";
     private StepClickListener mCallback;
+    @BindView(R.id.recipe_steps_recycler)
+    RecyclerView stepList_rv;
+    private ArrayList<Ingredient> mIngredients;
+
 
     public Master_Recipe_Fragment() {
     }
@@ -46,9 +47,13 @@ public class Master_Recipe_Fragment extends Fragment implements Master_Recipe_Ad
         }
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        if (savedInstanceState != null) {
+            mSteps = savedInstanceState.getParcelableArrayList(FRAGMENT_STEP_ARRAY);
+            mIngredients = savedInstanceState.getParcelableArrayList(FRAGMENT_INGREDIENT_ARRAY);
+        }
 
         final View rootView = inflater.inflate(R.layout.fragment_master_recipe, container, false);
 
@@ -74,14 +79,20 @@ public class Master_Recipe_Fragment extends Fragment implements Master_Recipe_Ad
         mSteps = steps;
     }
 
-    public void setIngredients(List<Ingredient> ingredients) {
+    public void setIngredients(ArrayList<Ingredient> ingredients) {
         mIngredients = ingredients;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(FRAGMENT_STEP_ARRAY, mSteps);
+        outState.putParcelableArrayList(FRAGMENT_INGREDIENT_ARRAY, mIngredients);
     }
 
     @Override
     public void onItemClicked(int stepClicked) {
         mCallback.onStepSelected(stepClicked);
-
     }
 
     public interface StepClickListener {

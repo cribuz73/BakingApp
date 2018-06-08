@@ -1,17 +1,13 @@
 package com.example.android.bakingapp;
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.bakingapp.Adapters.StepAdapter;
 import com.example.android.bakingapp.Fragments.Master_Recipe_Fragment;
 import com.example.android.bakingapp.Fragments.Video_step;
 import com.example.android.bakingapp.Retrofit.Model.Ingredient;
@@ -21,23 +17,21 @@ import com.example.android.bakingapp.Retrofit.Model.Step;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class RecipeActivity extends AppCompatActivity implements Master_Recipe_Fragment.StepClickListener {
 
-    @BindView(R.id.recipe_ingredients_details)
-    TextView recipe_ingredients_tv;
+
     public int stepPosition;
     private Recipe dRecipe;
-    private StepAdapter stepAdapter;
+    public static final String INGREDIENTS_ARRAY_LIST = "ingredients";
+    private static final String RECIPE_ID = "recipe_id";
+    public int mRecipeId;
     public ArrayList<Step> stepsArray;
-    @BindView(R.id.recipe_steps_list)
-    ListView recipe_steps_lv;
-    private Step clickedStep;
+    private List<Ingredient> ingredients;
+
     public static final String STEPS_ARRAY_LIST = "steps_ArrayList";
     public static final String STEP_POSITION = "step_position";
     private static final String TWO_PANE = "two_pane";
+    private ArrayList<Ingredient> ingredientsArray;
     private boolean mTwoPane;
 
     @Override
@@ -45,30 +39,30 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recipe_details);
 
-        ButterKnife.bind(this);
+        if (savedInstanceState == null) {
+            Intent intent = getIntent();
+            if (intent != null) {
+                Bundle data = getIntent().getExtras();
+                dRecipe = data.getParcelable("recipe");
+                String name = dRecipe.getName();
+                setTitle(name);
+                ingredients = dRecipe.getIngredients();
+                List<Step> steps = dRecipe.getSteps();
+                stepsArray = returnStepArrayList(steps);
+                ingredientsArray = returnIngredientArrayList(ingredients);
 
-        Bundle data = getIntent().getExtras();
-        dRecipe = data.getParcelable("recipe");
-        Intent intent = getIntent();
-        if (intent == null) {
-            closeOnError();
+            } else {
+                closeOnError();
+            }
         }
 
-        String name = dRecipe.getName();
-        setTitle(name);
-
-        StringBuilder recipeIngredients = new StringBuilder();
-        List<Ingredient> ingredients = dRecipe.getIngredients();
-
-
         FragmentManager fragmentManager = getSupportFragmentManager();
+        Master_Recipe_Fragment masterRecipeFragment = new Master_Recipe_Fragment();
+        masterRecipeFragment.setIngredients(ingredientsArray);
+        masterRecipeFragment.setSteps(stepsArray);
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.add(R.id.master_fragment_container, masterRecipeFragment).commit();
 
-        Master_Recipe_Fragment mrf = new Master_Recipe_Fragment();
-        mrf.setIngredients(ingredients);
-        mrf.setSteps(stepsArray);
-        fragmentManager.beginTransaction()
-                .add(R.id.master_fragment_container, mrf)
-                .commit();
 
         if (findViewById(R.id.step_detail_container) != null) {
             mTwoPane = true;
@@ -82,39 +76,24 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
         } else {
             mTwoPane = false;
         }
-
-
-        for (int i = 0; i < ingredients.size(); i++) {
-            recipeIngredients.append(ingredients.get(i).getIngredient());
-            recipeIngredients.append(",\n");
-        }
-        recipe_ingredients_tv.setText(recipeIngredients.toString());
-
-        final List<Step> recipeSteps = dRecipe.getSteps();
-
-        stepAdapter = new StepAdapter(this, 0, recipeSteps);
-        recipe_steps_lv.setAdapter(stepAdapter);
-        recipe_steps_lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                stepPosition = Integer.valueOf(position);
-                stepsArray = returnArrayList(recipeSteps);
-                Intent intent = new Intent(getApplicationContext(), StepActivity.class);
-                intent.putParcelableArrayListExtra(STEPS_ARRAY_LIST, stepsArray);
-                intent.putExtra(STEP_POSITION, stepPosition);
-                startActivity(intent);
-            }
-        });
-
     }
 
-    public ArrayList<Step> returnArrayList(List<Step> steps) {
+    public ArrayList<Step> returnStepArrayList(List<Step> steps) {
         stepsArray = new ArrayList<>();
         for (int i = 0; i < steps.size(); i++) {
             Step step = steps.get(i);
             stepsArray.add(step);
         }
         return stepsArray;
+    }
+
+    public ArrayList<Ingredient> returnIngredientArrayList(List<Ingredient> ingredients) {
+        ingredientsArray = new ArrayList<>();
+        for (int i = 0; i < ingredients.size(); i++) {
+            Ingredient ingredient = ingredients.get(i);
+            ingredientsArray.add(ingredient);
+        }
+        return ingredientsArray;
     }
 
     protected void closeOnError() {
@@ -130,6 +109,12 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
 
     @Override
     public void onStepSelected(int position) {
+        stepPosition = Integer.valueOf(position);
+        Intent intent = new Intent(getApplicationContext(), StepActivity.class);
+        intent.putParcelableArrayListExtra(STEPS_ARRAY_LIST, stepsArray);
+        intent.putExtra(STEP_POSITION, stepPosition);
+        startActivity(intent);
+
         if (mTwoPane) {
             Video_step newFragment = new Video_step();
             newFragment.setSteps(stepsArray);
@@ -138,8 +123,28 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.step_detail_container, newFragment)
                     .commit();
-
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(RECIPE_ID, dRecipe.getId());
+        outState.putParcelableArrayList(STEPS_ARRAY_LIST, stepsArray);
+        outState.putParcelableArrayList(INGREDIENTS_ARRAY_LIST, ingredientsArray);
+        outState.putBoolean(TWO_PANE, mTwoPane);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mRecipeId = savedInstanceState.getInt(RECIPE_ID);
+        stepsArray = savedInstanceState.getParcelableArrayList(STEPS_ARRAY_LIST);
+        ingredientsArray = savedInstanceState.getParcelableArrayList(INGREDIENTS_ARRAY_LIST);
+        mTwoPane = savedInstanceState.getBoolean(TWO_PANE);
 
     }
 }

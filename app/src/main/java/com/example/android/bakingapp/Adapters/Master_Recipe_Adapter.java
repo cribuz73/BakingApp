@@ -40,7 +40,7 @@ public class Master_Recipe_Adapter extends RecyclerView.Adapter<Master_Recipe_Ad
             holder.step_id_tv.setText(null);
             holder.step_short_description_tv.setText(mSteps.get(position).getShortDescription());
         } else {
-            holder.step_id_tv.setText(mSteps.get(position).getShortDescription());
+            holder.step_id_tv.setText(mSteps.get(position).getId().toString());
             holder.step_short_description_tv.setText(mSteps.get(position).getShortDescription());
 
         }
