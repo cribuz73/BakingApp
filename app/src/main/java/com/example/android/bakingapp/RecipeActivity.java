@@ -22,8 +22,11 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
 
     public int stepPosition;
     private Recipe dRecipe;
+    public static final String RECIPE_ID = "recipe_id";
     public static final String INGREDIENTS_ARRAY_LIST = "ingredients";
-    private static final String RECIPE_ID = "recipe_id";
+    public static final String RECIPE_NAME = "recipe_name";
+    private static String recipeName;
+
     public int mRecipeId;
     public ArrayList<Step> stepsArray;
     private List<Ingredient> ingredients;
@@ -43,9 +46,8 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
             Intent intent = getIntent();
             if (intent != null) {
                 Bundle data = getIntent().getExtras();
-                dRecipe = data.getParcelable("recipe");
-                String name = dRecipe.getName();
-                setTitle(name);
+                dRecipe = data.getParcelable("selected_recipe");
+                setTitle(dRecipe.getName());
                 ingredients = dRecipe.getIngredients();
                 List<Step> steps = dRecipe.getSteps();
                 stepsArray = returnStepArrayList(steps);
@@ -55,18 +57,19 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
                 closeOnError();
             }
         }
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Master_Recipe_Fragment masterRecipeFragment = new Master_Recipe_Fragment();
-        masterRecipeFragment.setIngredients(ingredientsArray);
-        masterRecipeFragment.setSteps(stepsArray);
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.add(R.id.master_fragment_container, masterRecipeFragment).commit();
-
+        if (savedInstanceState == null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            Master_Recipe_Fragment masterRecipeFragment = new Master_Recipe_Fragment();
+            masterRecipeFragment.setIngredients(ingredientsArray);
+            masterRecipeFragment.setSteps(stepsArray);
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.add(R.id.master_fragment_container, masterRecipeFragment).commit();
+        } else {
+        }
 
         if (findViewById(R.id.step_detail_container) != null) {
             mTwoPane = true;
-
+            FragmentManager fragmentManager = getSupportFragmentManager();
             Video_step mStepFragment = new Video_step();
             mStepFragment.setSteps(stepsArray);
             mStepFragment.hideNavigation(mTwoPane);
@@ -129,8 +132,9 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        outState.putInt(RECIPE_ID, dRecipe.getId());
+        dRecipe = getIntent().getExtras().getParcelable("selected_recipe");
+        outState.putInt(RecipeActivity.RECIPE_ID, dRecipe.getId());
+        outState.putString(RECIPE_NAME, dRecipe.getName());
         outState.putParcelableArrayList(STEPS_ARRAY_LIST, stepsArray);
         outState.putParcelableArrayList(INGREDIENTS_ARRAY_LIST, ingredientsArray);
         outState.putBoolean(TWO_PANE, mTwoPane);
@@ -145,6 +149,7 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
         stepsArray = savedInstanceState.getParcelableArrayList(STEPS_ARRAY_LIST);
         ingredientsArray = savedInstanceState.getParcelableArrayList(INGREDIENTS_ARRAY_LIST);
         mTwoPane = savedInstanceState.getBoolean(TWO_PANE);
-
+        recipeName = savedInstanceState.getString(RECIPE_NAME);
+        setTitle(recipeName);
     }
 }

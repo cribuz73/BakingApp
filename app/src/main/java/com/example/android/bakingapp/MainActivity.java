@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
     public Recipe recipe;
     public Ingredient ingredient;
     public Step step;
+    public static final String RECIPE_ID = "recipe_id";
+    public static final String SELECTED_RECIPE = "selected_recipe";
 
     private RecyclerView recipesNameRV;
     public RecipeAdapter adapter;
@@ -93,7 +95,8 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
     public void onClick(int position) {
         Recipe clickedRecipe = recipes.get(position);
         Intent intent = new Intent(getApplicationContext(), RecipeActivity.class);
-        intent.putExtra("recipe", clickedRecipe);
+        intent.putExtra(SELECTED_RECIPE, clickedRecipe);
+        intent.putExtra(RECIPE_ID, clickedRecipe.getId());
         startActivity(intent);
     }
 
