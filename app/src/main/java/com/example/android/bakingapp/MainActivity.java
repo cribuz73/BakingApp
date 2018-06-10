@@ -21,6 +21,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,20 +41,20 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
     public static final String RECIPE_ID = "recipe_id";
     public static final String SELECTED_RECIPE = "selected_recipe";
 
-    private RecyclerView recipesNameRV;
     public RecipeAdapter adapter;
+    @BindView(R.id.recipe_name_RV)
+    RecyclerView recipe_name_RV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
 
-        recipesNameRV = findViewById(R.id.recipe_name_RV);
-        recipesNameRV.setLayoutManager(new GridLayoutManager(this, numberOfColumns()));
-
+        recipe_name_RV.setLayoutManager(new GridLayoutManager(this, numberOfColumns()));
         adapter = new RecipeAdapter(this);
-        recipesNameRV.setAdapter(adapter);
+        recipe_name_RV.setAdapter(adapter);
 
         getRecipesData();
 

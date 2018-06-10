@@ -21,12 +21,12 @@
         </activity>
         <activity
             android:name=".RecipeActivity"
-            android:parentActivityName=".MainActivity"></activity>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".StepActivity"
-            android:parentActivityName=".RecipeActivity"></activity>
+            android:parentActivityName=".RecipeActivity" />
 
-        <receiver android:name=".BakingAppWidget">
+        <receiver android:name=".Widget.WidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -35,6 +35,18 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/baking_app_widget_info" />
         </receiver>
+
+        <activity android:name=".Widget.WidgetActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+
+        </activity>
+
+        <service
+            android:name=".Widget.WidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
     </application>
 
 </manifest>
