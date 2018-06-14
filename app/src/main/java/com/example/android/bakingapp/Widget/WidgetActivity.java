@@ -37,8 +37,11 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
     @BindView(R.id.widget_recipes)
     RecyclerView widget_recipes_RV;
     private int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+    private static final String WIDGET_INGREDIENTS = "widget_ingredients";
     private Context mContext;
     private ArrayList<Ingredient> ingredients;
+    private ArrayList<Ingredient> ingredientsArray;
+
     private ArrayList<Recipe> recipes;
     private ArrayList<Step> steps;
     private String responseJson;
@@ -108,10 +111,6 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
                 String name = recipeJson.opt("name").toString();
 
                 ingredients = retriveIngredients(recipeJson);
-                // steps = null;
-
-                // int servingsNumber = 0;
-                //  String recipeImage = "";
 
                 recipe = new Recipe(id, name, ingredients, null, null, null);
                 recipes.add(recipe);
@@ -120,7 +119,6 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
         } catch (org.json.JSONException e) {
             Log.e(TAG, "eroare");
         }
-
         return recipes;
     }
 
@@ -150,6 +148,28 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
 
     @Override
     public void onClick(int position) {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(WidgetActivity.this);
+        ingredientsArray = new ArrayList<>();
+        ingredientsArray = returnIngredientArrayList(recipes.get(position).getIngredients());
+        WidgetProvider.updateAppWidget(WidgetActivity.this, appWidgetManager, appWidgetId,
+                recipes.get(position).getId(),
+                recipes.get(position).getName(),
+                ingredientsArray);
 
+        Intent resultValue = new Intent();
+        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        resultValue.putExtra(WIDGET_INGREDIENTS, ingredients);
+
+        setResult(RESULT_OK, resultValue);
+        finish();
+    }
+
+    public ArrayList<Ingredient> returnIngredientArrayList(List<Ingredient> ingredients) {
+        ingredientsArray = new ArrayList<>();
+        for (int i = 0; i < ingredients.size(); i++) {
+            Ingredient ingredient = ingredients.get(i);
+            ingredientsArray.add(ingredient);
+        }
+        return ingredientsArray;
     }
 }

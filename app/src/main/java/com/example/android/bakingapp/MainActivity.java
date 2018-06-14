@@ -39,7 +39,9 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
     public Ingredient ingredient;
     public Step step;
     public static final String RECIPE_ID = "recipe_id";
+    public static final String RECIPE_NAME = "recipe_name";
     public static final String SELECTED_RECIPE = "selected_recipe";
+    public static final String RECIPE_INGREDIENTS = "recipe_ingredients";
 
     public RecipeAdapter adapter;
     @BindView(R.id.recipe_name_RV)
@@ -99,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
         Intent intent = new Intent(getApplicationContext(), RecipeActivity.class);
         intent.putExtra(SELECTED_RECIPE, clickedRecipe);
         intent.putExtra(RECIPE_ID, clickedRecipe.getId());
+        intent.putExtra(RECIPE_NAME, clickedRecipe.getName());
         startActivity(intent);
     }
 

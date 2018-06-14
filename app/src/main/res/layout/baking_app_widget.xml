@@ -3,29 +3,29 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget"
-    android:background="@color/widgetBackground"
+    android:background="@color/colorAccentLight"
     android:orientation="vertical"
     android:padding="@dimen/widget_margin">
 
     <TextView
-        android:id="@+id/recipe_name_wigText"
+        android:id="@+id/recipe_name_widget"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:background="@color/widgetBackground"
+        android:background="@color/colorAccentLight"
         android:contentDescription="@string/appwidget_text"
         android:textColor="@color/colorPrimaryDark"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         tools:text="HELLLLo" />
 
-    <ListView
-        android:id="@+id/recipe_ingredients_wigText"
+    <TextView
+        android:id="@+id/recipe_ingredients_widget"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:background="@color/widgetBackground"
+        android:background="@color/colorAccentLight"
         android:contentDescription="@string/appwidget_text"
         android:textColor="@color/colorPrimaryDark"
-        android:textSize="15sp" />
+        android:textSize="12sp" />
 </LinearLayout>

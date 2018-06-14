@@ -63,6 +63,19 @@ public class Master_Recipe_Fragment extends Fragment implements Master_Recipe_Ad
         StringBuilder recipeIngredients = new StringBuilder();
 
         for (int i = 0; i < mIngredients.size(); i++) {
+
+            double quantity = mIngredients.get(i).getQuantity();
+            String stringQuantity;
+            if (quantity - (int) quantity != 0) {
+                stringQuantity = String.valueOf(quantity);
+            } else {
+                stringQuantity = String.valueOf((int) quantity);
+            }
+
+            recipeIngredients.append(stringQuantity);
+            recipeIngredients.append(" ");
+            recipeIngredients.append(mIngredients.get(i).getMeasure());
+            recipeIngredients.append(" ");
             recipeIngredients.append(mIngredients.get(i).getIngredient());
             recipeIngredients.append(",\n");
         }

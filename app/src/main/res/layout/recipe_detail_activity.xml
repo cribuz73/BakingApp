@@ -13,7 +13,10 @@
             android:id="@+id/recipe_ingredients_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp" />
+            android:padding="10dp"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp"
+            tools:background="@color/colorAccentLight" />
 
         <ListView
             android:id="@+id/recipe_steps_list"
