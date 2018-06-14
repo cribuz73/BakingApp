@@ -3,6 +3,7 @@ package com.example.android.bakingapp.Widget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -45,6 +46,7 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
     private ArrayList<Recipe> recipes;
     private ArrayList<Step> steps;
     private String responseJson;
+    private String widgetIngredientsText;
     private Ingredient ingredient;
     private int widgetID;
     private Recipe recipe;
@@ -156,6 +158,9 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
                 recipes.get(position).getName(),
                 ingredientsArray);
 
+        SharedPreferences sp_widget_ingred = this.getSharedPreferences("ingredients_widget", Context.MODE_PRIVATE);
+        sp_widget_ingred.edit().putString("ingredients_string", ingredients_SB(recipes.get(position).getIngredients())).apply();
+
         Intent resultValue = new Intent();
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         resultValue.putExtra(WIDGET_INGREDIENTS, ingredients);
@@ -171,5 +176,29 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
             ingredientsArray.add(ingredient);
         }
         return ingredientsArray;
+    }
+
+    private String ingredients_SB(List<Ingredient> mIngredients) {
+        StringBuilder recipeIngredients = new StringBuilder();
+
+        for (int i = 0; i < mIngredients.size(); i++) {
+
+            double quantity = mIngredients.get(i).getQuantity();
+            String stringQuantity;
+            if (quantity - (int) quantity != 0) {
+                stringQuantity = String.valueOf(quantity);
+            } else {
+                stringQuantity = String.valueOf((int) quantity);
+            }
+
+            recipeIngredients.append(stringQuantity);
+            recipeIngredients.append(" ");
+            recipeIngredients.append(mIngredients.get(i).getMeasure());
+            recipeIngredients.append(" ");
+            recipeIngredients.append(mIngredients.get(i).getIngredient());
+            recipeIngredients.append(",\n");
+        }
+        widgetIngredientsText = recipeIngredients.toString();
+        return widgetIngredientsText;
     }
 }

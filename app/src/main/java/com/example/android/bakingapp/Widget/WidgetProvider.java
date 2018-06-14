@@ -49,7 +49,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
         // Set the list of ingredients for the selected recipe
         Intent adapterIntent = new Intent(context, WidgetService.class);
-        adapterIntent.putParcelableArrayListExtra(MainActivity.RECIPE_INGREDIENTS, ingredients);
+        //    adapterIntent.putParcelableArrayListExtra(MainActivity.RECIPE_INGREDIENTS, ingredients);
         views.setRemoteAdapter(R.id.recipe_ingredients_widget, adapterIntent);
 
         // Instruct the widget manager to update the widget
@@ -58,7 +58,6 @@ public class WidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-
     }
 
     @Override
