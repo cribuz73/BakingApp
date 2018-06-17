@@ -24,6 +24,7 @@ public class WidgetProvider extends AppWidgetProvider {
     private static List<Ingredient> ingredientList;
     private Context mContext;
     private String recipeName;
+    private static String widgetIngredientsText;
 
     public WidgetProvider() {
     }
@@ -33,19 +34,28 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId, int recipeId, String recipeName, ArrayList<Ingredient> ingredients) {
+                                int appWidgetId, int position, String recipeName, ArrayList<Ingredient> ingredients) {
+
+        StringBuilder recipeIngredients = new StringBuilder();
+
+        for (int i = 0; i < ingredients.size(); i++) {
+
+            recipeIngredients.append(ingredients.get(i).getIngredient());
+            recipeIngredients.append("/");
+        }
+        widgetIngredientsText = recipeIngredients.toString();
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.baking_app_widget);
 
         // Set widget title and create an intent to launch RecipeDetailsActivity
         Intent intent = new Intent(context, RecipeActivity.class);
-        intent.putExtra(MainActivity.RECIPE_ID, recipeId);
+        intent.putExtra(MainActivity.RECIPE_POSITION, position);
         intent.putExtra(MainActivity.RECIPE_NAME, recipeName);
-        intent.putParcelableArrayListExtra(MainActivity.RECIPE_INGREDIENTS, ingredients);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setOnClickPendingIntent(R.id.recipe_name_widget, pendingIntent);
+        views.setOnClickPendingIntent(R.id.widget, pendingIntent);
         views.setTextViewText(R.id.recipe_name_widget, recipeName.concat(" ").concat(context.getString(R.string.ingredients)));
+        views.setTextViewText(R.id.recipe_ingredients_widget, widgetIngredientsText);
 
         // Set the list of ingredients for the selected recipe
         Intent adapterIntent = new Intent(context, WidgetService.class);
@@ -70,4 +80,3 @@ public class WidgetProvider extends AppWidgetProvider {
         // Enter relevant functionality for when the last widget is disabled
     }
 }
-

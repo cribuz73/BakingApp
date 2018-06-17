@@ -19,7 +19,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,9 +37,11 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
     public Recipe recipe;
     public Ingredient ingredient;
     public Step step;
+    public static final String RECIPE_POSITION = "recipe_position";
+    public static final String ALL_RECIPES = "all_recipes";
     public static final String RECIPE_ID = "recipe_id";
     public static final String RECIPE_NAME = "recipe_name";
-    public static final String SELECTED_RECIPE = "selected_recipe";
+    public static String recipesJsonString;
     public static final String RECIPE_INGREDIENTS = "recipe_ingredients";
 
     public RecipeAdapter adapter;
@@ -81,9 +82,9 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
             @Override
             public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
 
-                final String recipesString = response.body().toString();
+                recipesJsonString = response.body().toString();
 
-                retriveRecipes(recipesString);
+                retriveRecipes(recipesJsonString);
 
                 adapter.setRecipes(recipes);
             }
@@ -99,13 +100,14 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
     public void onClick(int position) {
         Recipe clickedRecipe = recipes.get(position);
         Intent intent = new Intent(getApplicationContext(), RecipeActivity.class);
-        intent.putExtra(SELECTED_RECIPE, clickedRecipe);
+        intent.putParcelableArrayListExtra(ALL_RECIPES, recipes);
         intent.putExtra(RECIPE_ID, clickedRecipe.getId());
         intent.putExtra(RECIPE_NAME, clickedRecipe.getName());
+        intent.putExtra(RECIPE_POSITION, position);
         startActivity(intent);
     }
 
-    private List<Recipe> retriveRecipes(String responseJson) {
+    public ArrayList<Recipe> retriveRecipes(String responseJson) {
         try {
             JSONArray jsonArray = new JSONArray(responseJson);
             for (int i = 0; i <= jsonArray.length(); i++) {
@@ -127,6 +129,10 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
             Log.e(TAG, "eroare");
         }
 
+        return recipes;
+    }
+
+    public ArrayList<Recipe> getRecipes() {
         return recipes;
     }
 
@@ -174,5 +180,6 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
         }
         return steps;
     }
+
 
 }

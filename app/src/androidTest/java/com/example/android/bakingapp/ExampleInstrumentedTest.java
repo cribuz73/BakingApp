@@ -1,13 +1,16 @@
 package com.example.android.bakingapp;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.contrib.RecyclerViewActions;
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -16,11 +19,25 @@ import static org.junit.Assert.*;
  */
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
-    @Test
-    public void useAppContext() {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.android.bakingapp", appContext.getPackageName());
+    @Rule
+    public ActivityTestRule<MainActivity> mActivityTestRule
+            = new ActivityTestRule<>(MainActivity.class);
+
+    @Test
+    public void recipeAppearance() {
+
+        Espresso.onView(withId(R.id.recipe_name_RV)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+
     }
+
+    @Test
+    public void stepAppearance() {
+
+        Espresso.onView(withId(R.id.recipe_name_RV)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+
+        Espresso.onView(withId(R.id.recipe_steps_recycler)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+
+    }
+
 }

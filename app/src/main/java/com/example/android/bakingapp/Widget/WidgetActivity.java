@@ -152,9 +152,10 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
     public void onClick(int position) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(WidgetActivity.this);
         ingredientsArray = new ArrayList<>();
+        Recipe selectedRecipe = recipes.get(position);
         ingredientsArray = returnIngredientArrayList(recipes.get(position).getIngredients());
         WidgetProvider.updateAppWidget(WidgetActivity.this, appWidgetManager, appWidgetId,
-                recipes.get(position).getId(),
+                position,
                 recipes.get(position).getName(),
                 ingredientsArray);
 
