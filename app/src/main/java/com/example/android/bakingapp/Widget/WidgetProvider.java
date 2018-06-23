@@ -12,13 +12,11 @@ import com.example.android.bakingapp.R;
 import com.example.android.bakingapp.RecipeActivity;
 import com.example.android.bakingapp.Retrofit.Model.Ingredient;
 import com.example.android.bakingapp.Retrofit.Model.Recipe;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Implementation of App Widget functionality.
- */
 public class WidgetProvider extends AppWidgetProvider {
 
     public static final String EXTRA_ITEM = "1";
@@ -46,15 +44,17 @@ public class WidgetProvider extends AppWidgetProvider {
         }
         widgetIngredientsText = recipeIngredients.toString();
 
-        // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.baking_app_widget);
 
-        // Set widget title and create an intent to launch RecipeDetailsActivity
+        Gson gson = new Gson();
+
         Intent intent = new Intent(context, RecipeActivity.class);
         intent.putExtra(MainActivity.RECIPE_POSITION, position);
         intent.putExtra(MainActivity.RECIPE_NAME, recipeName);
-        //   intent.putParcelableArrayListExtra(MainActivity.ALL_RECIPES, recipes);
+        intent.putExtra("RECIPES_WIDGET_GSON", gson.toJson(recipes));
+
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         views.setOnClickPendingIntent(R.id.widget, pendingIntent);
         views.setTextViewText(R.id.recipe_name_widget, recipeName.concat(" ").concat(context.getString(R.string.ingredients)));
         views.setTextViewText(R.id.recipe_ingredients_widget, widgetIngredientsText);
@@ -68,11 +68,9 @@ public class WidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onEnabled(Context context) {
-        // Enter relevant functionality for when the first widget is created
     }
 
     @Override
     public void onDisabled(Context context) {
-        // Enter relevant functionality for when the last widget is disabled
     }
 }

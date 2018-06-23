@@ -6,27 +6,20 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.example.android.bakingapp.Fragments.Master_Recipe_Fragment;
 import com.example.android.bakingapp.Fragments.Video_step;
-import com.example.android.bakingapp.Retrofit.Model.API_Trailer;
 import com.example.android.bakingapp.Retrofit.Model.Ingredient;
 import com.example.android.bakingapp.Retrofit.Model.Recipe;
 import com.example.android.bakingapp.Retrofit.Model.Recipe_Interface;
 import com.example.android.bakingapp.Retrofit.Model.Step;
-import com.google.gson.JsonArray;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class RecipeActivity extends AppCompatActivity implements Master_Recipe_Fragment.StepClickListener {
 
@@ -41,6 +34,7 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
     public int mRecipeId;
     public ArrayList<Step> stepsArray;
     private List<Ingredient> ingredients;
+    private List<Step> steps;
     private static final String TAG = "RecipeActivity - error";
     private ArrayList<Recipe> allRecipes;
 
@@ -70,17 +64,20 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
                 Bundle data = getIntent().getExtras();
                 allRecipes = data.getParcelableArrayList(MainActivity.ALL_RECIPES);
                 if (allRecipes == null) {
-                    //       MainActivity ma = new MainActivity();
-                    //      ma.getRecipesData();
-                    //      allRecipes = ma.retriveRecipes(MainActivity.recipesJsonString);
-                    getRecipesDetailedData();
+                    Gson gson = new Gson();
+                    Type type = new TypeToken<ArrayList<Recipe>>() {
+                    }.getType();
+                    String strObj = getIntent().getStringExtra("RECIPES_WIDGET_GSON");
+                    ArrayList<Recipe> allRecipesGson = new ArrayList<>();
+                    allRecipesGson = gson.fromJson(strObj, type);
+                    allRecipes = allRecipesGson;
                 }
 
                 recipePosition = data.getInt(MainActivity.RECIPE_POSITION);
                 dRecipe = allRecipes.get(recipePosition);
                 setTitle(dRecipe.getName());
                 ingredients = dRecipe.getIngredients();
-                List<Step> steps = dRecipe.getSteps();
+                steps = dRecipe.getSteps();
                 stepsArray = returnStepArrayList(steps);
                 ingredientsArray = returnIngredientArrayList(ingredients);
 
@@ -95,7 +92,6 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
             masterRecipeFragment.setSteps(stepsArray);
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.add(R.id.master_fragment_container, masterRecipeFragment).commit();
-        } else {
         }
 
         if (findViewById(R.id.step_detail_container) != null) {
@@ -143,11 +139,6 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
 
     @Override
     public void onStepSelected(int position) {
-        stepPosition = Integer.valueOf(position);
-        Intent intent = new Intent(getApplicationContext(), StepActivity.class);
-        intent.putParcelableArrayListExtra(STEPS_ARRAY_LIST, stepsArray);
-        intent.putExtra(STEP_POSITION, stepPosition);
-        startActivity(intent);
 
         if (mTwoPane) {
             Video_step newFragment = new Video_step();
@@ -157,6 +148,12 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.step_detail_container, newFragment)
                     .commit();
+        } else {
+            stepPosition = Integer.valueOf(position);
+            Intent intent = new Intent(getApplicationContext(), StepActivity.class);
+            intent.putParcelableArrayListExtra(STEPS_ARRAY_LIST, stepsArray);
+            intent.putExtra(STEP_POSITION, stepPosition);
+            startActivity(intent);
         }
     }
 
@@ -165,8 +162,7 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
         super.onSaveInstanceState(outState);
         dRecipe = allRecipes.get(recipePosition);
 
-        //     dRecipe = getIntent().getExtras().getParcelable("selected_recipe");
-        outState.putInt(RecipeActivity.RECIPE_ID, dRecipe.getId());
+//        outState.putInt(RecipeActivity.RECIPE_ID, dRecipe.getId());
         outState.putString(RECIPE_NAME, dRecipe.getName());
         outState.putParcelableArrayList(STEPS_ARRAY_LIST, stepsArray);
         outState.putParcelableArrayList(INGREDIENTS_ARRAY_LIST, ingredientsArray);
@@ -184,94 +180,6 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
         mTwoPane = savedInstanceState.getBoolean(TWO_PANE);
         recipeName = savedInstanceState.getString(RECIPE_NAME);
         setTitle(recipeName);
-    }
-
-    private void getRecipesDetailedData() {
-        m_recipe_interface = API_Trailer.getClient().create(Recipe_Interface.class);
-        String a = m_recipe_interface.getAnswer().request().url().toString();
-        m_recipe_interface.getAnswer().enqueue(new Callback<JsonArray>() {
-
-            @Override
-            public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
-                final String recipesString = response.body().toString();
-                retriveRecipes(recipesString);
-            }
-
-            @Override
-            public void onFailure(Call<JsonArray> call, Throwable t) {
-            }
-        });
-
-    }
-
-    public List<Recipe> retriveRecipes(String responseJson) {
-        try {
-            JSONArray jsonArray = new JSONArray(responseJson);
-            for (int i = 0; i <= jsonArray.length(); i++) {
-                JSONObject recipeJson = jsonArray.getJSONObject(i);
-                int id = recipeJson.optInt("id");
-                String name = recipeJson.opt("name").toString();
-
-                mArrayIngredients = retriveIngredients(recipeJson);
-                mArraySteps = retriveSteps(recipeJson);
-
-                int servingsNumber = recipeJson.getInt("servings");
-                String recipeImage = recipeJson.opt("image").toString();
-
-                mRecipe = new Recipe(id, name, mArrayIngredients, mArraySteps, servingsNumber, recipeImage);
-                allRecipes.add(mRecipe);
-            }
-
-        } catch (org.json.JSONException e) {
-            Log.e(TAG, "eroare");
-        }
-
-        return allRecipes;
-    }
-
-    private ArrayList<Ingredient> retriveIngredients(JSONObject recipe) {
-
-        mArrayIngredients = new ArrayList<>();
-
-        try {
-            JSONArray ingredientsList = recipe.getJSONArray("ingredients");
-            int a = ingredientsList.length();
-            for (int j = 0; j <= ingredientsList.length(); j++) {
-
-                JSONObject ingredientJson = ingredientsList.getJSONObject(j);
-                Double ingredientQuantity = ingredientJson.optDouble("quantity");
-                String ingredientMeasure = ingredientJson.optString("measure");
-                String ingredientName = ingredientJson.optString("ingredient");
-                mIngredient = new Ingredient(ingredientQuantity, ingredientMeasure, ingredientName);
-                mArrayIngredients.add(mIngredient);
-            }
-        } catch (org.json.JSONException e) {
-            Log.e(TAG, "eroare");
-        }
-
-        return mArrayIngredients;
-    }
-
-    private ArrayList<Step> retriveSteps(JSONObject recipe) {
-        mArraySteps = new ArrayList<>();
-
-        try {
-            JSONArray stepsList = recipe.getJSONArray("steps");
-            for (int k = 0; k <= stepsList.length(); k++) {
-                JSONObject stepJson = stepsList.getJSONObject(k);
-                int stepId = stepJson.optInt("id");
-                String stepShortDescription = stepJson.optString("shortDescription");
-                String stepDescription = stepJson.optString("description");
-                String stepVideo = stepJson.optString("videoURL");
-                String stepImage = stepJson.optString("thumbnailURL");
-                mStep = new Step(stepId, stepShortDescription, stepDescription, stepVideo, stepImage);
-                mArraySteps.add(mStep);
-            }
-
-        } catch (org.json.JSONException e) {
-            Log.e(TAG, "eroare");
-        }
-        return mArraySteps;
     }
 
 }

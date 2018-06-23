@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
     private int numberOfColumns() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        // You can change this divider to adjust the size of the poster
         int widthDivider = 400;
         int width = displayMetrics.widthPixels;
         int nColumns = width / widthDivider;
@@ -94,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
             }
         });
     }
-
 
     @Override
     public void onClick(int position) {

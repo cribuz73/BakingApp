@@ -3,7 +3,6 @@ package com.example.android.bakingapp.Widget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -50,6 +49,7 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
     private Ingredient ingredient;
     private int widgetID;
     private Recipe recipe;
+    private Step wStep;
     private Recipe_Interface recipe_interface_widget;
 
     @Override
@@ -113,8 +113,11 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
                 String name = recipeJson.opt("name").toString();
 
                 ingredients = retriveIngredients(recipeJson);
+                steps = retriveSteps(recipeJson);
 
-                recipe = new Recipe(id, name, ingredients, null, null, null);
+                int servingsNumber = recipeJson.getInt("servings");
+                String recipeImage = recipeJson.opt("image").toString();
+                recipe = new Recipe(id, name, ingredients, steps, servingsNumber, recipeImage);
                 recipes.add(recipe);
             }
 
@@ -147,21 +150,37 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
         return ingredients;
     }
 
+    private ArrayList<Step> retriveSteps(JSONObject recipe) {
+        steps = new ArrayList<>();
 
+        try {
+            JSONArray stepsList = recipe.getJSONArray("steps");
+            for (int k = 0; k <= stepsList.length(); k++) {
+                JSONObject stepJson = stepsList.getJSONObject(k);
+                int stepId = stepJson.optInt("id");
+                String stepShortDescription = stepJson.optString("shortDescription");
+                String stepDescription = stepJson.optString("description");
+                String stepVideo = stepJson.optString("videoURL");
+                String stepImage = stepJson.optString("thumbnailURL");
+                wStep = new Step(stepId, stepShortDescription, stepDescription, stepVideo, stepImage);
+                steps.add(wStep);
+            }
+
+        } catch (org.json.JSONException e) {
+            Log.e(TAG, "eroare");
+        }
+        return steps;
+    }
     @Override
     public void onClick(int position) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(WidgetActivity.this);
         ingredientsArray = new ArrayList<>();
-        Recipe selectedRecipe = recipes.get(position);
         ingredientsArray = returnIngredientArrayList(recipes.get(position).getIngredients());
         WidgetProvider.updateAppWidget(WidgetActivity.this, appWidgetManager, appWidgetId,
                 position,
                 recipes.get(position).getName(),
                 ingredientsArray,
                 recipes);
-
-        SharedPreferences sp_widget_ingred = this.getSharedPreferences("ingredients_widget", Context.MODE_PRIVATE);
-        sp_widget_ingred.edit().putString("ingredients_string", ingredients_SB(recipes.get(position).getIngredients())).apply();
 
         Intent resultValue = new Intent();
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
@@ -179,27 +198,4 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
         return ingredientsArray;
     }
 
-    private String ingredients_SB(List<Ingredient> mIngredients) {
-        StringBuilder recipeIngredients = new StringBuilder();
-
-        for (int i = 0; i < mIngredients.size(); i++) {
-
-            double quantity = mIngredients.get(i).getQuantity();
-            String stringQuantity;
-            if (quantity - (int) quantity != 0) {
-                stringQuantity = String.valueOf(quantity);
-            } else {
-                stringQuantity = String.valueOf((int) quantity);
-            }
-
-            recipeIngredients.append(stringQuantity);
-            recipeIngredients.append(" ");
-            recipeIngredients.append(mIngredients.get(i).getMeasure());
-            recipeIngredients.append(" ");
-            recipeIngredients.append(mIngredients.get(i).getIngredient());
-            recipeIngredients.append(",\n");
-        }
-        widgetIngredientsText = recipeIngredients.toString();
-        return widgetIngredientsText;
-    }
 }
