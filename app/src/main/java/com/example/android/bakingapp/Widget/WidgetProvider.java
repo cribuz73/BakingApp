@@ -11,6 +11,7 @@ import com.example.android.bakingapp.MainActivity;
 import com.example.android.bakingapp.R;
 import com.example.android.bakingapp.RecipeActivity;
 import com.example.android.bakingapp.Retrofit.Model.Ingredient;
+import com.example.android.bakingapp.Retrofit.Model.Recipe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId, int position, String recipeName, ArrayList<Ingredient> ingredients) {
+                                int appWidgetId, int position, String recipeName, ArrayList<Ingredient> ingredients, ArrayList<Recipe> recipes) {
 
         StringBuilder recipeIngredients = new StringBuilder();
 
@@ -52,17 +53,12 @@ public class WidgetProvider extends AppWidgetProvider {
         Intent intent = new Intent(context, RecipeActivity.class);
         intent.putExtra(MainActivity.RECIPE_POSITION, position);
         intent.putExtra(MainActivity.RECIPE_NAME, recipeName);
+        //   intent.putParcelableArrayListExtra(MainActivity.ALL_RECIPES, recipes);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         views.setOnClickPendingIntent(R.id.widget, pendingIntent);
         views.setTextViewText(R.id.recipe_name_widget, recipeName.concat(" ").concat(context.getString(R.string.ingredients)));
         views.setTextViewText(R.id.recipe_ingredients_widget, widgetIngredientsText);
 
-        // Set the list of ingredients for the selected recipe
-        Intent adapterIntent = new Intent(context, WidgetService.class);
-        //    adapterIntent.putParcelableArrayListExtra(MainActivity.RECIPE_INGREDIENTS, ingredients);
-        views.setRemoteAdapter(R.id.recipe_ingredients_widget, adapterIntent);
-
-        // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 

@@ -157,7 +157,8 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
         WidgetProvider.updateAppWidget(WidgetActivity.this, appWidgetManager, appWidgetId,
                 position,
                 recipes.get(position).getName(),
-                ingredientsArray);
+                ingredientsArray,
+                recipes);
 
         SharedPreferences sp_widget_ingred = this.getSharedPreferences("ingredients_widget", Context.MODE_PRIVATE);
         sp_widget_ingred.edit().putString("ingredients_string", ingredients_SB(recipes.get(position).getIngredients())).apply();
@@ -165,7 +166,6 @@ public class WidgetActivity extends AppCompatActivity implements WidgetAdapter.W
         Intent resultValue = new Intent();
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         resultValue.putExtra(WIDGET_INGREDIENTS, ingredients);
-
         setResult(RESULT_OK, resultValue);
         finish();
     }

@@ -163,6 +163,8 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        dRecipe = allRecipes.get(recipePosition);
+
         //     dRecipe = getIntent().getExtras().getParcelable("selected_recipe");
         outState.putInt(RecipeActivity.RECIPE_ID, dRecipe.getId());
         outState.putString(RECIPE_NAME, dRecipe.getName());
