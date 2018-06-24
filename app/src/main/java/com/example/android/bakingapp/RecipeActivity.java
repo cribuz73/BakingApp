@@ -1,10 +1,10 @@
 package com.example.android.bakingapp;
 
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
@@ -12,7 +12,6 @@ import com.example.android.bakingapp.Fragments.Master_Recipe_Fragment;
 import com.example.android.bakingapp.Fragments.Video_step;
 import com.example.android.bakingapp.Retrofit.Model.Ingredient;
 import com.example.android.bakingapp.Retrofit.Model.Recipe;
-import com.example.android.bakingapp.Retrofit.Model.Recipe_Interface;
 import com.example.android.bakingapp.Retrofit.Model.Step;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -21,35 +20,30 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class RecipeActivity extends AppCompatActivity implements Master_Recipe_Fragment.StepClickListener {
 
 
-    public int stepPosition;
-    private Recipe dRecipe;
     public static final String RECIPE_ID = "recipe_id";
     public static final String INGREDIENTS_ARRAY_LIST = "ingredients";
     public static final String RECIPE_NAME = "recipe_name";
+    public static final String STEPS_ARRAY_LIST = "steps_ArrayList";
+    public static final String STEP_POSITION = "step_position";
+    private static final String TWO_PANE = "two_pane";
     private static String recipeName;
+    private static final String TAG = "RecipeActivity - error";
 
+    public int stepPosition;
+    private Recipe dRecipe;
     public int mRecipeId;
     public ArrayList<Step> stepsArray;
     private List<Ingredient> ingredients;
     private List<Step> steps;
-    private static final String TAG = "RecipeActivity - error";
     private ArrayList<Recipe> allRecipes;
-
-    public static final String STEPS_ARRAY_LIST = "steps_ArrayList";
-    public static final String STEP_POSITION = "step_position";
-    private static final String TWO_PANE = "two_pane";
     private ArrayList<Ingredient> ingredientsArray;
     private boolean mTwoPane;
     private int recipePosition;
-    private Recipe_Interface m_recipe_interface;
-    private Recipe mRecipe;
-    private Step mStep;
-    private Ingredient mIngredient;
-    private ArrayList<Step> mArraySteps;
-    private ArrayList<Ingredient> mArrayIngredients;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,7 +69,8 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
 
                 recipePosition = data.getInt(MainActivity.RECIPE_POSITION);
                 dRecipe = allRecipes.get(recipePosition);
-                setTitle(dRecipe.getName());
+                recipeName = dRecipe.getName();
+                setTitle(recipeName);
                 ingredients = dRecipe.getIngredients();
                 steps = dRecipe.getSteps();
                 stepsArray = returnStepArrayList(steps);
@@ -84,27 +79,27 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
             } else {
                 closeOnError();
             }
-        }
-        if (savedInstanceState == null) {
+
             FragmentManager fragmentManager = getSupportFragmentManager();
             Master_Recipe_Fragment masterRecipeFragment = new Master_Recipe_Fragment();
             masterRecipeFragment.setIngredients(ingredientsArray);
             masterRecipeFragment.setSteps(stepsArray);
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.add(R.id.master_fragment_container, masterRecipeFragment).commit();
-        }
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.add(R.id.master_fragment_container, masterRecipeFragment, "first").commit();
 
-        if (findViewById(R.id.step_detail_container) != null) {
-            mTwoPane = true;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            Video_step mStepFragment = new Video_step();
-            mStepFragment.setSteps(stepsArray);
-            mStepFragment.hideNavigation(mTwoPane);
-            fragmentManager.beginTransaction()
-                    .add(R.id.step_detail_container, mStepFragment)
-                    .commit();
-        } else {
-            mTwoPane = false;
+
+            if (findViewById(R.id.step_detail_container) != null) {
+                mTwoPane = true;
+                fragmentManager = getSupportFragmentManager();
+                Video_step mStepFragment = new Video_step();
+                mStepFragment.setSteps(stepsArray);
+                mStepFragment.hideNavigation(mTwoPane);
+                fragmentManager.beginTransaction()
+                        .add(R.id.step_detail_container, mStepFragment)
+                        .commit();
+            } else {
+                mTwoPane = false;
+            }
         }
     }
 
@@ -149,7 +144,7 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
                     .replace(R.id.step_detail_container, newFragment)
                     .commit();
         } else {
-            stepPosition = Integer.valueOf(position);
+            stepPosition = position;
             Intent intent = new Intent(getApplicationContext(), StepActivity.class);
             intent.putParcelableArrayListExtra(STEPS_ARRAY_LIST, stepsArray);
             intent.putExtra(STEP_POSITION, stepPosition);
@@ -160,26 +155,19 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        dRecipe = allRecipes.get(recipePosition);
-
-//        outState.putInt(RecipeActivity.RECIPE_ID, dRecipe.getId());
-        outState.putString(RECIPE_NAME, dRecipe.getName());
+        outState.putString(RECIPE_NAME, recipeName);
         outState.putParcelableArrayList(STEPS_ARRAY_LIST, stepsArray);
         outState.putParcelableArrayList(INGREDIENTS_ARRAY_LIST, ingredientsArray);
         outState.putBoolean(TWO_PANE, mTwoPane);
-
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
-        mRecipeId = savedInstanceState.getInt(RECIPE_ID);
         stepsArray = savedInstanceState.getParcelableArrayList(STEPS_ARRAY_LIST);
         ingredientsArray = savedInstanceState.getParcelableArrayList(INGREDIENTS_ARRAY_LIST);
-        mTwoPane = savedInstanceState.getBoolean(TWO_PANE);
+        mTwoPane = savedInstanceState.getBoolean(TWO_PANE, false);
         recipeName = savedInstanceState.getString(RECIPE_NAME);
         setTitle(recipeName);
     }
-
 }

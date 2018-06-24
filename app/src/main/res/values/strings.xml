@@ -7,4 +7,8 @@
 
     <string name="ingredients">Ingredients</string>
 
+    <string name="prev_step">Prev Step</string>
+    <string name="next_step">Next Step</string>
+
+
 </resources>

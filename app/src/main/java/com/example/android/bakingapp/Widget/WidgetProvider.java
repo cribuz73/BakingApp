@@ -15,22 +15,12 @@ import com.example.android.bakingapp.Retrofit.Model.Recipe;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class WidgetProvider extends AppWidgetProvider {
 
-    public static final String EXTRA_ITEM = "1";
-    private static List<Ingredient> ingredientList;
-    private Context mContext;
-    private String recipeName;
+
     private static String widgetIngredientsText;
 
-    public WidgetProvider() {
-    }
-
-    public WidgetProvider(Context context) {
-        mContext = context;
-    }
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId, int position, String recipeName, ArrayList<Ingredient> ingredients, ArrayList<Recipe> recipes) {

@@ -29,24 +29,22 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity implements RecipeAdapter.RecipeAdapterOnClickHandler {
 
 
-    private Recipe_Interface recipe_interface;
+    public static final String RECIPE_POSITION = "recipe_position";
+    public static final String ALL_RECIPES = "all_recipes";
+    public static final String RECIPE_ID = "recipe_id";
+    public static final String RECIPE_NAME = "recipe_name";
     private static final String TAG = "Main Activity";
+    public static String recipesJsonString;
     public ArrayList<Recipe> recipes = new ArrayList<>();
     public ArrayList<Ingredient> ingredients = new ArrayList<>();
     public ArrayList<Step> steps = new ArrayList<>();
     public Recipe recipe;
     public Ingredient ingredient;
     public Step step;
-    public static final String RECIPE_POSITION = "recipe_position";
-    public static final String ALL_RECIPES = "all_recipes";
-    public static final String RECIPE_ID = "recipe_id";
-    public static final String RECIPE_NAME = "recipe_name";
-    public static String recipesJsonString;
-    public static final String RECIPE_INGREDIENTS = "recipe_ingredients";
-
     public RecipeAdapter adapter;
     @BindView(R.id.recipe_name_RV)
     RecyclerView recipe_name_RV;
+    private Recipe_Interface recipe_interface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,13 +52,11 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-
         recipe_name_RV.setLayoutManager(new GridLayoutManager(this, numberOfColumns()));
         adapter = new RecipeAdapter(this);
         recipe_name_RV.setAdapter(adapter);
 
         getRecipesData();
-
     }
 
     private int numberOfColumns() {
@@ -130,10 +126,6 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
         return recipes;
     }
 
-    public ArrayList<Recipe> getRecipes() {
-        return recipes;
-    }
-
     private ArrayList<Ingredient> retriveIngredients(JSONObject recipe) {
 
         ingredients = new ArrayList<>();
@@ -172,12 +164,9 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
                 step = new Step(stepId, stepShortDescription, stepDescription, stepVideo, stepImage);
                 steps.add(step);
             }
-
         } catch (org.json.JSONException e) {
             Log.e(TAG, "eroare");
         }
         return steps;
     }
-
-
 }
