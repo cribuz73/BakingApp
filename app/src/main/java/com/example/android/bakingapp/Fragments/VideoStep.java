@@ -28,6 +28,7 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -324,7 +325,7 @@ public class VideoStep extends Fragment implements SimpleExoPlayer.EventListener
                 //             mExoPlayer.setPlayWhenReady(true);
 
             } else {
-                Picasso.with(getContext())
+                Picasso.get()
                         .load(Uri.parse(mSteps.get(currentPosition).getThumbnailURL()))
                         .error(R.drawable.cake_blank)
                         .into(thumbnail_iv, new Callback() {
@@ -334,7 +335,7 @@ public class VideoStep extends Fragment implements SimpleExoPlayer.EventListener
                             }
 
                             @Override
-                            public void onError() {
+                            public void onError(Exception e) {
                                 thumbnail_iv.setImageResource(R.drawable.cake_blank);
                             }
                         });
@@ -357,8 +358,9 @@ public class VideoStep extends Fragment implements SimpleExoPlayer.EventListener
         mHideNavigation = hideButtons;
     }
 
+
     @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest) {
+    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
 
     }
 
@@ -403,14 +405,36 @@ public class VideoStep extends Fragment implements SimpleExoPlayer.EventListener
     }
 
     @Override
+    public void onRepeatModeChanged(int repeatMode) {
+
+    }
+
+    @Override
+    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+    }
+
+    @Override
     public void onPlayerError(ExoPlaybackException error) {
 
     }
 
     @Override
-    public void onPositionDiscontinuity() {
+    public void onPositionDiscontinuity(int reason) {
 
     }
+
+    @Override
+    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+    }
+
+    @Override
+    public void onSeekProcessed() {
+
+    }
+
+
 
     private void hideSystemUI() {
         if (getActivity() != null) {
