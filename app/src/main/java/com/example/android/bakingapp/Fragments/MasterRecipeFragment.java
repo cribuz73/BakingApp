@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class Master_Recipe_Fragment extends Fragment implements Master_Recipe_Adapter.ItemClickListener {
+public class MasterRecipeFragment extends Fragment implements Master_Recipe_Adapter.ItemClickListener {
 
     @BindView(R.id.recipe_ingredients_details)
     TextView ingredients_tv;
@@ -33,7 +33,7 @@ public class Master_Recipe_Fragment extends Fragment implements Master_Recipe_Ad
     private ArrayList<Ingredient> mIngredients;
 
 
-    public Master_Recipe_Fragment() {
+    public MasterRecipeFragment() {
     }
 
     @Override

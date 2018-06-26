@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,7 +18,7 @@
         android:textColor="@color/colorPrimaryDark"
         android:textSize="18sp"
         android:textStyle="bold"
-        tools:text="HELLLLo" />
+        tools:text="Recipe Name" />
 
     <TextView
         android:id="@+id/recipe_ingredients_widget"
@@ -27,5 +28,6 @@
         android:background="@color/colorAccentLight"
         android:contentDescription="@string/appwidget_text"
         android:textColor="@color/colorPrimaryDark"
-        android:textSize="12sp" />
+        android:textSize="12sp"
+        tools:text="Ingredients" />
 </LinearLayout>

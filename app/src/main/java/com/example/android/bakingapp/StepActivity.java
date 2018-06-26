@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 
-import com.example.android.bakingapp.Fragments.Video_step;
+import com.example.android.bakingapp.Fragments.VideoStep;
 import com.example.android.bakingapp.Retrofit.Model.Step;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class StepActivity extends AppCompatActivity {
 
             FragmentManager fragmentManager = getSupportFragmentManager();
 
-            Video_step stepFragment = new Video_step();
+            VideoStep stepFragment = new VideoStep();
             ArrayList<Step> mSteps = getIntent().getParcelableArrayListExtra(RecipeActivity.STEPS_ARRAY_LIST);
             stepFragment.setSteps(mSteps);
             stepFragment.setPosition(stepNumber);

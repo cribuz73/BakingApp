@@ -2,7 +2,10 @@ package com.example.android.bakingapp.Fragments;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -15,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -36,14 +40,17 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class Video_step extends Fragment implements SimpleExoPlayer.EventListener {
+public class VideoStep extends Fragment implements SimpleExoPlayer.EventListener {
     private static final String CURRENT_PLAYER_POSITION = "current_player_position";
     private static final String CURRENT_PLAYER_STATE = "current_player_state";
     private static final String HIDE_NAVIGATION = "hide_navigation";
@@ -52,6 +59,8 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
     private static MediaSessionCompat mMediaSession;
     @BindView(R.id.playerView)
     SimpleExoPlayerView video_step_pv;
+    @BindView(R.id.step_thumbnail)
+    ImageView thumbnail_iv;
     @BindView(R.id.step_description)
     TextView step_description_tv;
     @BindView(R.id.next_button)
@@ -67,9 +76,10 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
     private boolean currentMediaPlayerState;
     private boolean mHideNavigation;
     private PlaybackStateCompat.Builder mStateBuilder;
+    private String extensionThumbnail;
 
 
-    public Video_step() {
+    public VideoStep() {
     }
 
     public static float[] getScreenSize(Context context) {
@@ -227,6 +237,27 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
 
     }
 
+    private static Bitmap retriveVideoFrameFromVideo(String videoPath) throws Throwable {
+        Bitmap bitmap;
+        MediaMetadataRetriever mediaMetadataRetriever = null;
+        try {
+            mediaMetadataRetriever = new MediaMetadataRetriever();
+            if (Build.VERSION.SDK_INT >= 14)
+                mediaMetadataRetriever.setDataSource(videoPath, new HashMap<String, String>());
+            else
+                mediaMetadataRetriever.setDataSource(videoPath);
+            bitmap = mediaMetadataRetriever.getFrameAtTime(1, MediaMetadataRetriever.OPTION_CLOSEST);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Throwable("Exception in retriveVideoFrameFromVideo(String videoPath)" + e.getMessage());
+        } finally {
+            if (mediaMetadataRetriever != null) {
+                mediaMetadataRetriever.release();
+            }
+        }
+        return bitmap;
+    }
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -237,6 +268,10 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
             outState.putLong(CURRENT_PLAYER_POSITION, currentMediaPlayerPosition);
             outState.putBoolean(CURRENT_PLAYER_STATE, currentMediaPlayerState);
         }
+        //   if (extensionThumbnail.equals(".mp4")){
+        //       outState.putLong(CURRENT_PLAYER_POSITION, currentMediaPlayerPosition);
+        //       outState.putBoolean(CURRENT_PLAYER_STATE, currentMediaPlayerState);
+        //   }
     }
 
     private void setStepContent() {
@@ -245,6 +280,7 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
 
         if (!TextUtils.isEmpty(mSteps.get(currentPosition).getVideoURL())) {
             video_step_pv.setVisibility(View.VISIBLE);
+            thumbnail_iv.setVisibility(View.GONE);
             initializePlayer(
                     getContext(),
                     Uri.parse(mSteps.get(currentPosition).getVideoURL()));
@@ -254,6 +290,9 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
             releasePlayer();
             if (!TextUtils.isEmpty(mSteps.get(currentPosition).getThumbnailURL())) {
                 loadThumbnail();
+            } else {
+                thumbnail_iv.setVisibility(View.VISIBLE);
+                thumbnail_iv.setImageResource(R.drawable.cake_blank);
             }
 
         }
@@ -264,16 +303,47 @@ public class Video_step extends Fragment implements SimpleExoPlayer.EventListene
 
     private void loadThumbnail() {
         if (!TextUtils.isEmpty(mSteps.get(currentPosition).getThumbnailURL())) {
-            video_step_pv.setVisibility(View.VISIBLE);
-            initializePlayer(
-                    getContext(),
-                    Uri.parse(mSteps.get(currentPosition).getThumbnailURL()));
-            mExoPlayer.setPlayWhenReady(true);
-        } else {
-            video_step_pv.setVisibility(View.GONE);
-            releasePlayer();
+            //    video_step_pv.setVisibility(View.VISIBLE);
+            String thumbnailUriString = Uri.parse(mSteps.get(currentPosition).getThumbnailURL()).toString();
+            extensionThumbnail = thumbnailUriString.substring(thumbnailUriString.lastIndexOf("."));
+
+            if (extensionThumbnail.equals(".mp4")) {
+                thumbnail_iv.setVisibility(View.VISIBLE);
+                try {
+                    Bitmap image = retriveVideoFrameFromVideo(thumbnailUriString);
+                    thumbnail_iv.setImageBitmap(image);
+
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+
+                //              video_step_pv.setVisibility(View.VISIBLE);
+                //              initializePlayer(
+                //                     getContext(),
+                //                     Uri.parse(mSteps.get(currentPosition).getThumbnailURL()));
+                //             mExoPlayer.setPlayWhenReady(true);
+
+            } else {
+                Picasso.with(getContext())
+                        .load(Uri.parse(mSteps.get(currentPosition).getThumbnailURL()))
+                        .error(R.drawable.cake_blank)
+                        .into(thumbnail_iv, new Callback() {
+                            @Override
+                            public void onSuccess() {
+
+                            }
+
+                            @Override
+                            public void onError() {
+                                thumbnail_iv.setImageResource(R.drawable.cake_blank);
+                            }
+                        });
+
+            }
+
         }
     }
+
 
     public void setSteps(ArrayList<Step> steps) {
         mSteps = steps;

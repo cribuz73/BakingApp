@@ -8,8 +8,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
-import com.example.android.bakingapp.Fragments.Master_Recipe_Fragment;
-import com.example.android.bakingapp.Fragments.Video_step;
+import com.example.android.bakingapp.Fragments.MasterRecipeFragment;
+import com.example.android.bakingapp.Fragments.VideoStep;
 import com.example.android.bakingapp.Retrofit.Model.Ingredient;
 import com.example.android.bakingapp.Retrofit.Model.Recipe;
 import com.example.android.bakingapp.Retrofit.Model.Step;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class RecipeActivity extends AppCompatActivity implements Master_Recipe_Fragment.StepClickListener {
+public class RecipeActivity extends AppCompatActivity implements MasterRecipeFragment.StepClickListener {
 
 
     public static final String RECIPE_ID = "recipe_id";
@@ -81,7 +81,7 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
             }
 
             FragmentManager fragmentManager = getSupportFragmentManager();
-            Master_Recipe_Fragment masterRecipeFragment = new Master_Recipe_Fragment();
+            MasterRecipeFragment masterRecipeFragment = new MasterRecipeFragment();
             masterRecipeFragment.setIngredients(ingredientsArray);
             masterRecipeFragment.setSteps(stepsArray);
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -91,7 +91,7 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
             if (findViewById(R.id.step_detail_container) != null) {
                 mTwoPane = true;
                 fragmentManager = getSupportFragmentManager();
-                Video_step mStepFragment = new Video_step();
+                VideoStep mStepFragment = new VideoStep();
                 mStepFragment.setSteps(stepsArray);
                 mStepFragment.hideNavigation(mTwoPane);
                 fragmentManager.beginTransaction()
@@ -136,7 +136,7 @@ public class RecipeActivity extends AppCompatActivity implements Master_Recipe_F
     public void onStepSelected(int position) {
 
         if (mTwoPane) {
-            Video_step newFragment = new Video_step();
+            VideoStep newFragment = new VideoStep();
             newFragment.setSteps(stepsArray);
             newFragment.setPosition(position);
             newFragment.hideNavigation(mTwoPane);

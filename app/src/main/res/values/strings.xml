@@ -6,6 +6,8 @@
     <string name="add_widget">Add widget</string>
 
     <string name="ingredients">Ingredients</string>
+    <string name="please_choose">Please choose a recipe</string>
+
 
     <string name="prev_step">Prev Step</string>
     <string name="next_step">Next Step</string>
